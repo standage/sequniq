@@ -28,8 +28,11 @@ def uniqseqs(seqdata, trimdefline=False, checkrevcom=False, fastq=True,
         sequniq.parse.check_record(record, fastq=fastq, paired=paired)
 
         seq = record[1]
-        if fastq and paired:
-            seq += record[4]
+        if paired:
+            if fastq:
+                seq += record[4]
+            else:
+                seq += record[3]
         seqsha = hashlib.sha1(seq).hexdigest()
 
         if seqsha not in seqs:

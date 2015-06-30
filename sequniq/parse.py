@@ -6,6 +6,7 @@
 """
 Generators for parsing sequence data records in Fasta and Fastq.
 """
+import sys
 
 
 def get_parser(fastq=True, paired=True):
@@ -19,8 +20,10 @@ def get_parser(fastq=True, paired=True):
         else:
             return fastq
     else:
-        assert not paired
-        return fasta
+        if paired:
+            return fasta_paired
+        else:
+            return fasta
 
 
 def check_record(record, fastq=True, paired=True):
@@ -32,7 +35,10 @@ def check_record(record, fastq=True, paired=True):
         else:
             assert len(record) == 3
     else:
-        assert len(record) == 2
+        if paired:
+            assert len(record) == 4
+        else:
+            assert len(record) == 2
 
 
 def fasta(fp):
@@ -51,6 +57,20 @@ def fasta(fp):
             seq.append(line)
     if name:
         yield name, ''.join(seq)
+
+
+def fasta_paired(fp):
+    """
+    Generator yields paired sequence records from Fasta files.
+    """
+    defline_i, seq_i = None, None
+    for defline_j, seq_j in fasta(fp):
+        if seq_i is None:
+            defline_i, seq_i = defline_j, seq_j
+        else:
+            yield defline_i, seq_i, defline_j, seq_j
+            defline_i, seq_i = None, None
+    assert seq_i is None, 'paired Fasta data contains odd number of sequences'
 
 
 def fastq(fp):
@@ -95,3 +115,26 @@ def fastq_paired(fp):
             qual2 = line.rstrip()
             yield name1, seq1, qual1, name2, seq2, qual2
             name1, seq1, qual1, name2, seq2, qual2 = [None] * 6
+
+
+def write(record, outstream=sys.stdout):
+    """
+    Write Fasta/Fastq records.
+
+    Records are tuples:
+      - 2 elements = unpaired Fasta
+      - 3 elements = unpaired Fastq
+      - 4 elements = paired Fasta
+      - 6 elements = paired Fastq
+    """
+    if len(record) == 2:
+        fmt = '%s\n%s'
+    elif len(record) == 4:
+        fmt = '%s\n%s\n%s\n%s'
+    elif len(record) == 3:
+        fmt = '%s\n%s\n+\n%s'
+    elif len(record) == 6:
+        fmt = '%s\n%s\n+\n%s\n%s\n%s\n+\n%s'
+    else:
+        raise Exception('record has % elements' % len(record))
+    print >> outstream, fmt % record
