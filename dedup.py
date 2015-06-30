@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2015, Daniel S. Standage and CONTRIBUTORS
-#
-# HymHub is distributed under the CC BY 4.0 License. See the
-# 'LICENSE' file in the HymHub code distribution or online at
-# https://github.com/BrendelGroup/HymHub/blob/master/LICENSE.
+# -----------------------------------------------------------------------------
+# Copyright (C) Daniel Standage, 2015. It is licensed under the ISC license,
+# see LICENSE.txt. Contact: daniel.standage@gmail.com
+# -----------------------------------------------------------------------------
 
 import argparse
 import sys
